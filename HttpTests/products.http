@@ -1,0 +1,137 @@
+### ===================================================================
+### LojaApi - Testes de Produtos (CRUD e Filtros)
+### Extensão recomendada: REST Client (Huachao Mao) para VS Code
+### ===================================================================
+
+@baseUrl = http://localhost:5050
+@contentType = application/json
+
+### -------------------------------------------------------------------
+### 1. CONSULTAS (GET)
+### -------------------------------------------------------------------
+
+### Listar todos os produtos
+GET {{baseUrl}}/api/products
+Accept: {{contentType}}
+
+###
+
+### Filtrar produtos por nome (search)
+GET {{baseUrl}}/api/products?search=Teclado
+Accept: {{contentType}}
+
+###
+
+### Filtrar produtos por preço mínimo (minPrice)
+GET {{baseUrl}}/api/products?minPrice=100
+Accept: {{contentType}}
+
+###
+
+### Filtrar produtos por categoria (categoryId = 1: Hardware, 2: Books, 3: Office)
+GET {{baseUrl}}/api/products?categoryId=1
+Accept: {{contentType}}
+
+###
+
+### Filtrar combinando múltiplos parâmetros (search + minPrice + categoryId)
+GET {{baseUrl}}/api/products?search=Teclado&minPrice=50&categoryId=1
+Accept: {{contentType}}
+
+###
+
+### Obter produto por ID fixo (ex: ID 1)
+GET {{baseUrl}}/api/products/1
+Accept: {{contentType}}
+
+
+### -------------------------------------------------------------------
+### 2. CADASTRO DE PRODUTOS (POST)
+### -------------------------------------------------------------------
+
+### Criar produto na categoria Hardware (Id: 1)
+# @name createProductHardware
+POST {{baseUrl}}/api/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Teclado Mecânico RGB",
+  "price": 349.90,
+  "stock": 15,
+  "categoryId": 1
+}
+
+###
+
+### Criar produto na categoria Livros (Id: 2)
+# @name createProductBooks
+POST {{baseUrl}}/api/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Clean Code: A Handbook of Agile Software Craftsmanship",
+  "price": 89.90,
+  "stock": 20,
+  "categoryId": 2
+}
+
+###
+
+### Criar produto na categoria Escritório (Id: 3)
+# @name createProductOffice
+POST {{baseUrl}}/api/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Cadeira Ergonômica Pro",
+  "price": 1250.00,
+  "stock": 5,
+  "categoryId": 3
+}
+
+
+### -------------------------------------------------------------------
+### 3. CONSULTA DINÂMICA DO PRODUTO CRIADO
+### -------------------------------------------------------------------
+
+### Obter o produto criado no POST createProductHardware acima
+@newProductId = {{createProductHardware.response.body.$.id}}
+
+GET {{baseUrl}}/api/products/{{newProductId}}
+Accept: {{contentType}}
+
+
+### -------------------------------------------------------------------
+### 4. ATUALIZAÇÃO DE PRODUTO (PUT)
+### -------------------------------------------------------------------
+
+### Atualizar dados do produto recém-criado
+PUT {{baseUrl}}/api/products/{{newProductId}}
+Content-Type: {{contentType}}
+
+{
+  "name": "Teclado Mecânico RGB Wireless",
+  "price": 389.90,
+  "stock": 12,
+  "categoryId": 1
+}
+
+###
+
+### Confirmar as alterações realizadas no produto
+GET {{baseUrl}}/api/products/{{newProductId}}
+Accept: {{contentType}}
+
+
+### -------------------------------------------------------------------
+### 5. EXCLUSÃO DE PRODUTO (DELETE)
+### -------------------------------------------------------------------
+
+### Excluir o produto criado
+DELETE {{baseUrl}}/api/products/{{newProductId}}
+
+###
+
+### Verificar que o produto excluído não é mais encontrado (esperado 404 Not Found)
+GET {{baseUrl}}/api/products/{{newProductId}}
+Accept: {{contentType}}

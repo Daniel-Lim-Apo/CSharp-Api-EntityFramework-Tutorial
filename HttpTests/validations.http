@@ -1,0 +1,101 @@
+### ===================================================================
+### LojaApi - Testes de Validações e Tratamento de Exceções
+### Cobre: Data Annotations, ProblemDetails e Respostas de Erro
+### ===================================================================
+
+@baseUrl = http://localhost:5050
+@contentType = application/json
+
+### -------------------------------------------------------------------
+### 1. VALIDAÇÃO DE DTO NO CADASTRO (POST /api/products)
+### -------------------------------------------------------------------
+
+### Erro: Nome em branco / ausente (esperado 400 Bad Request - Required)
+POST {{baseUrl}}/api/products
+Content-Type: {{contentType}}
+
+{
+  "name": "",
+  "price": 100.00,
+  "stock": 5,
+  "categoryId": 1
+}
+
+###
+
+### Erro: Nome com menos de 2 caracteres (esperado 400 Bad Request - MinimumLength = 2)
+POST {{baseUrl}}/api/products
+Content-Type: {{contentType}}
+
+{
+  "name": "A",
+  "price": 100.00,
+  "stock": 5,
+  "categoryId": 1
+}
+
+###
+
+### Erro: Preço inválido (zero ou negativo, esperado 400 Bad Request - Range 0.01 a 999999.99)
+POST {{baseUrl}}/api/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Monitor UltraWide",
+  "price": 0.00,
+  "stock": 5,
+  "categoryId": 1
+}
+
+###
+
+### Erro: Estoque inicial negativo (esperado 400 Bad Request - Range 0 a MaxValue)
+POST {{baseUrl}}/api/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Monitor UltraWide",
+  "price": 1500.00,
+  "stock": -10,
+  "categoryId": 1
+}
+
+###
+
+### Erro: Categoria inexistente no banco (esperado 400 Bad Request - "CategoryId does not exist.")
+POST {{baseUrl}}/api/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Headset Gamer 7.1",
+  "price": 250.00,
+  "stock": 10,
+  "categoryId": 9999
+}
+
+
+### -------------------------------------------------------------------
+### 2. RECURSOS NÃO ENCONTRADOS (404 NOT FOUND)
+### -------------------------------------------------------------------
+
+### GET produto inexistente por ID (esperado 404 Not Found)
+GET {{baseUrl}}/api/products/999999
+Accept: {{contentType}}
+
+###
+
+### PUT atualizar produto inexistente por ID (esperado 404 Not Found)
+PUT {{baseUrl}}/api/products/999999
+Content-Type: {{contentType}}
+
+{
+  "name": "Produto Inexistente",
+  "price": 99.90,
+  "stock": 10,
+  "categoryId": 1
+}
+
+###
+
+### DELETE excluir produto inexistente por ID (esperado 404 Not Found)
+DELETE {{baseUrl}}/api/products/999999

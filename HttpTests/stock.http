@@ -1,0 +1,102 @@
+### ===================================================================
+### LojaApi - Testes de Movimentação e Ajuste de Estoque
+### Endpoint: POST /api/products/{id}/stock
+### ===================================================================
+
+@baseUrl = http://localhost:5050
+@contentType = application/json
+
+### -------------------------------------------------------------------
+### Preparação: Cadastrar produto para testes de estoque
+### -------------------------------------------------------------------
+
+# @name setupProductForStock
+POST {{baseUrl}}/api/products
+Content-Type: {{contentType}}
+
+{
+  "name": "Mouse Gamer Óptico",
+  "price": 149.90,
+  "stock": 10,
+  "categoryId": 1
+}
+
+###
+
+### Captura o ID do produto criado no POST acima
+@targetProductId = {{setupProductForStock.response.body.$.id}}
+
+### Consultar estoque inicial (deve ser 10)
+GET {{baseUrl}}/api/products/{{targetProductId}}
+Accept: {{contentType}}
+
+
+### -------------------------------------------------------------------
+### 1. ENTRADA DE ESTOQUE (QUANTIDADE POSITIVA)
+### -------------------------------------------------------------------
+
+### Adicionar +15 unidades ao estoque (10 + 15 = 25)
+POST {{baseUrl}}/api/products/{{targetProductId}}/stock
+Content-Type: {{contentType}}
+
+{
+  "quantity": 15
+}
+
+###
+
+### Verificar se o estoque foi atualizado para 25
+GET {{baseUrl}}/api/products/{{targetProductId}}
+Accept: {{contentType}}
+
+
+### -------------------------------------------------------------------
+### 2. SAÍDA DE ESTOQUE (QUANTIDADE NEGATIVA)
+### -------------------------------------------------------------------
+
+### Dar baixa de -8 unidades no estoque (25 - 8 = 17)
+POST {{baseUrl}}/api/products/{{targetProductId}}/stock
+Content-Type: {{contentType}}
+
+{
+  "quantity": -8
+}
+
+###
+
+### Verificar se o estoque foi atualizado para 17
+GET {{baseUrl}}/api/products/{{targetProductId}}
+Accept: {{contentType}}
+
+
+### -------------------------------------------------------------------
+### 3. VALIDAÇÕES E ERROS DE ESTOQUE
+### -------------------------------------------------------------------
+
+### Erro: Quantidade igual a zero (esperado 400 Bad Request)
+POST {{baseUrl}}/api/products/{{targetProductId}}/stock
+Content-Type: {{contentType}}
+
+{
+  "quantity": 0
+}
+
+###
+
+### Erro: Estoque insuficiente (tentar subtrair mais do que existe, esperado 400 Bad Request)
+POST {{baseUrl}}/api/products/{{targetProductId}}/stock
+Content-Type: {{contentType}}
+
+{
+  "quantity": -9999
+}
+
+###
+
+### Erro: Ajustar estoque de produto inexistente (esperado 404 Not Found)
+POST {{baseUrl}}/api/products/999999/stock
+Content-Type: {{contentType}}
+
+{
+  "quantity": 5
+}
